@@ -53,7 +53,7 @@ module.exports = (app) => {
           entry.callsign = aisData.callsign;
         }
         if (aisData.name) {
-          entry.name = aisData.name;
+          entry.shipname = aisData.name;
         }
         if (Number.isFinite(aisData.draught)) {
           entry.draught = aisData.draught;
