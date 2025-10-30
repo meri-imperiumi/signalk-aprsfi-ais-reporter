@@ -1,0 +1,32 @@
+{
+  "name": "@meri-imperiumi/signalk-aprsfi-ais-reporter",
+  "version": "1.0.0",
+  "description": "AIS data to aprs.fi forwarder service",
+  "main": "plugin/index.js",
+  "scripts": {
+    "test": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/meri-imperiumi/signalk-aprsfi-ais-reporter.git"
+  },
+  "keywords": [
+    "signalk-node-server-plugin",
+    "signalk-category-ais"
+  ],
+  "author": "Henri Bergius <henri.bergius@iki.fi>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/meri-imperiumi/signalk-aprsfi-ais-reporter/issues"
+  },
+  "homepage": "https://github.com/meri-imperiumi/signalk-aprsfi-ais-reporter#readme",
+  "dependencies": {
+    "ais-stream-decoder": "^2.1.2",
+    "circular-buffer": "^1.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.32.0"
+  }
+}
