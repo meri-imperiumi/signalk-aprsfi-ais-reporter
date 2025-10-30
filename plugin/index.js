@@ -134,14 +134,14 @@ module.exports = (app) => {
       properties: {
         name: {
           type: 'string',
-          title: 'Sender name',
+          title: 'Sender callsign',
         },
         url: {
           type: 'string',
           format: 'uri',
           title: 'Service upload endpoint URL',
           description: 'AIS sending URL from aprs.fi settings page including password',
-          example: 'https://aprs.fi/jsonais/post/c273rhauwf7',
+          default: 'https://aprs.fi/jsonais/post/c273rhauwf7',
         },
         event: {
           type: 'string',
