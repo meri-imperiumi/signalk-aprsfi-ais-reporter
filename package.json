@@ -15,6 +15,9 @@
     "signalk-category-ais"
   ],
   "author": "Henri Bergius <henri.bergius@iki.fi>",
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/meri-imperiumi/signalk-aprsfi-ais-reporter/issues"
