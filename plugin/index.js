@@ -1,5 +1,4 @@
 const { default: AISDecoder } = require('ais-stream-decoder');
-const CircularBuffer = require('circular-buffer');
 
 const decoder = new AISDecoder();
 
@@ -7,7 +6,7 @@ module.exports = (app) => {
   let onAISEvent;
   let events = [];
   // Max messages per submission
-  let queue = new CircularBuffer(300);
+  let queue = {};
   let interval;
   const plugin = {
     id: 'signalk-aprsfi-ais-reporter',
@@ -55,19 +54,39 @@ module.exports = (app) => {
         if (aisData.name) {
           entry.shipname = aisData.name;
         }
+        if (aisData.vendorId) {
+          entry.vendorid = aisData.vendorId;
+        }
+        if (Number.isFinite(aisData.dimBow)) {
+          entry.ref_front = aisData.dimBow;
+        }
+        if (Number.isFinite(aisData.dimPort)) {
+          entry.ref_left = aisData.dimPort;
+        }
         if (Number.isFinite(aisData.draught)) {
           entry.draught = aisData.draught;
         }
         if (Number.isFinite(aisData.length)) {
           entry.length = aisData.length;
+        } else if (Number.isFinite(aisData.dimBow)
+          && Number.isFinite(aisData.dimStern)) {
+          entry.length = aisData.dimBow + aisData.dimStern;
         }
         if (Number.isFinite(aisData.width)) {
           entry.width = aisData.width;
+        } else if (Number.isFinite(aisData.dimPort)
+          && Number.isFinite(aisData.dimStarboard)) {
+          entry.width = aisData.dimPort + aisData.dimStarboard;
         }
         if (aisData.destination) {
           entry.destination = aisData.destination;
         }
-        queue.enq(entry);
+        // TODO: persons_on_board
+        // app.debug('Processed data', entry);
+        if (!queue[entry.mmsi]) {
+          queue[entry.mmsi] = {};
+        }
+        queue[entry.mmsi][entry.msgtype] = entry;
       });
       onAISEvent = (message) => {
         if (!message.match(/!AIVDM/)) {
