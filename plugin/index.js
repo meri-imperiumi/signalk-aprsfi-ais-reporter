@@ -17,7 +17,15 @@ module.exports = (app) => {
         app.setPluginStatus('No upload URL set');
         return;
       }
-      decoder.on('data', (aisData) => {
+      decoder.on('data', (data) => {
+        let aisData = data;
+        if (typeof data === 'string') {
+          aisData = JSON.parse(data);
+        }
+        // app.debug('AIS data', aisData);
+        if (!aisData.mmsi) {
+          return;
+        }
         // Based on https://github.com/gregbartels/ais_jsonaprs/blob/main/ais_json.py
         const entry = {
           msgtype: aisData.type,
