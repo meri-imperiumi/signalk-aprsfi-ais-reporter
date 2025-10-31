@@ -21,8 +21,7 @@
   },
   "homepage": "https://github.com/meri-imperiumi/signalk-aprsfi-ais-reporter#readme",
   "dependencies": {
-    "ais-stream-decoder": "^2.1.2",
-    "circular-buffer": "^1.0.3"
+    "ais-stream-decoder": "^2.1.2"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
