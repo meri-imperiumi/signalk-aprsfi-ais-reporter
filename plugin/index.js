@@ -50,11 +50,11 @@ module.exports = (app) => {
         if (Number.isFinite(aisData.navStatus)) {
           entry.status = aisData.navStatus;
         }
-        if (aisData.typeAndCargo) {
+        if (Number.isFinite(aisData.typeAndCargo)) {
           entry.shiptype = aisData.typeAndCargo;
         }
-        if (aisData.typeAndCargo) {
-          entry.shiptype = aisData.typeAndCargo;
+        if (Number.isFinite(aisData.partNo)) {
+          entry.partno = aisData.partNo;
         }
         if (aisData.callsign) {
           entry.callsign = aisData.callsign;
@@ -108,38 +108,57 @@ module.exports = (app) => {
         app.on(eventName, onAISEvent);
       });
       interval = setInterval(() => {
-        if (queue.size() === 0) {
+        if (Object.keys(queue).length === 0) {
           app.setPluginStatus('No AIS events to report');
           return;
         }
-        const messages = queue.toarray();
+        const messages = [];
+        Object
+          .keys(queue)
+          .forEach((mmsi) => {
+            Object
+              .keys(queue[mmsi])
+              .forEach((msgType) => {
+                messages.push(queue[mmsi][msgType]);
+              });
+          });
         // Clear queue
-        queue = new CircularBuffer(300);
+        queue = {};
+        const payload = {
+          encodetime: new Date().toISOString().replace(/[T:-]/g, '').substr(0, 14),
+          protocol: 'jsonais',
+
+          groups: [
+            {
+              path: [
+                {
+                  name: settings.name || 'NOCALL',
+                  url: settings.sender_url || 'https://signalk.org',
+                },
+              ],
+              msgs: messages,
+            },
+          ],
+        };
+        const data = new FormData();
+        data.append('jsonais', JSON.stringify(payload));
         fetch(settings.url, {
           method: 'post',
           headers: {
-            'Content-Type': 'application/json',
+            Accept: 'application/json',
           },
-          body: JSON.stringify({
-            encodetime: new Date().toISOString().replace(/[T:-]/g, '').substr(0, 14),
-            protocol: 'jsonais',
-
-            groups: [
-              {
-                path: [
-                  {
-                    name: settings.name || 'NOCALL',
-                    url: settings.url,
-                  },
-                ],
-                msgs: messages,
-              },
-            ],
-          }),
+          body: data,
         })
           .then((response) => {
             if (!response.ok) {
               throw new Error(`Request failed with HTTP ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((response) => {
+            if (response.result !== 'ok') {
+              app.debug('Response', response);
+              throw new Error(response.description);
             }
             app.setPluginStatus(`Submitted ${messages.length} AIS entries`);
           })
@@ -162,6 +181,11 @@ module.exports = (app) => {
         name: {
           type: 'string',
           title: 'Sender callsign',
+        },
+        sender_url: {
+          type: 'string',
+          title: 'Sender URL',
+          default: 'https://signalk.org',
         },
         url: {
           type: 'string',
