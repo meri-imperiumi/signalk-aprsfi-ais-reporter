@@ -12,7 +12,8 @@
   },
   "keywords": [
     "signalk-node-server-plugin",
-    "signalk-category-ais"
+    "signalk-category-ais",
+    "signalk-category-cloud"
   ],
   "author": "Henri Bergius <henri.bergius@iki.fi>",
   "publishConfig": {
@@ -30,5 +31,12 @@
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.32.0"
+  },
+  "signalk": {
+    "appIcon": "./doc/appicon.png",
+    "displayName": "AIS to aprs.fi Reporter",
+    "screenshots": [
+      "./doc/panama-canal.png"
+    ]
   }
 }
