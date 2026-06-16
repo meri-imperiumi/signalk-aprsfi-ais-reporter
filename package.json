@@ -1,6 +1,6 @@
 {
   "name": "@meri-imperiumi/signalk-aprsfi-ais-reporter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AIS data to aprs.fi forwarder service",
   "main": "plugin/index.js",
   "scripts": {
