@@ -9,7 +9,4 @@ To get started [feeding AIS](https://aprs.fi/page/ais_feeding):
 
 ## Changes
 
-* 1.0.1 (2026-06-16)
-  - Added app icon
-* 1.0.0 (2025-10-31)
-  - Initial release
+See [Changelog](CHANGELOG.md)
