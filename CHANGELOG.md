@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - Skip aprs.fi submissions when Signal K path `network.internet.state` is `offline`
+- Smoketests covering plugin start/stop, AIS decoding, and aprs.fi submission
 
 ## [1.0.1] - 2026-06-16
 ### Added

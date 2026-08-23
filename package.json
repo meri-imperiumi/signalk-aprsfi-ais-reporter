@@ -4,7 +4,7 @@
   "description": "AIS data to aprs.fi forwarder service",
   "main": "plugin/index.js",
   "scripts": {
-    "test": "eslint ."
+    "test": "node --test --test-force-exit \"tests/*.test.js\" && eslint ."
   },
   "repository": {
     "type": "git",
