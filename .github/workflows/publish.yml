@@ -5,14 +5,19 @@ on:
     tags:
       - "*"
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v3.0.2
+      - uses: actions/setup-node@v3.1.1
         with:
           node-version: 24
+          package-manager-cache: false  # never use caching in release builds
       - run: npm install
       - run: npm test
 
@@ -20,11 +25,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v3.0.2
+      - uses: actions/setup-node@v3.1.1
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
+          package-manager-cache: false  # never use caching in release builds
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
