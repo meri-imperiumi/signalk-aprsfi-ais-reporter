@@ -5,9 +5,11 @@ const decoder = new AISDecoder();
 module.exports = (app) => {
   let onAISEvent;
   let events = [];
+  let unsubscribes = [];
   // Max messages per submission
   let queue = {};
   let interval;
+  let internetState = null;
   const plugin = {
     id: 'signalk-aprsfi-ais-reporter',
     name: 'aprs.fi AIS reporter',
@@ -107,7 +109,46 @@ module.exports = (app) => {
       events.forEach((eventName) => {
         app.on(eventName, onAISEvent);
       });
+      const internetSubscription = {
+        context: 'vessels.self',
+        subscribe: [
+          {
+            path: 'network.internet.state',
+            period: 60000,
+          },
+        ],
+      };
+      app.subscriptionmanager.subscribe(
+        internetSubscription,
+        unsubscribes,
+        (subscriptionError) => {
+          app.error(`Internet state subscription error: ${subscriptionError}`);
+        },
+        (delta) => {
+          if (!delta.updates) {
+            return;
+          }
+          delta.updates.forEach((u) => {
+            if (!u.values) {
+              return;
+            }
+            u.values.forEach((v) => {
+              if (v.path === 'network.internet.state') {
+                internetState = v.value;
+              }
+            });
+          });
+        },
+      );
+      const currentInternetState = app.getSelfPath('network.internet.state');
+      if (currentInternetState) {
+        internetState = currentInternetState.value || currentInternetState;
+      }
       interval = setInterval(() => {
+        if (internetState === 'offline') {
+          app.setPluginStatus('Internet offline, skipping aprs.fi submission');
+          return;
+        }
         if (Object.keys(queue).length === 0) {
           app.setPluginStatus('No AIS events to report');
           return;
@@ -171,6 +212,8 @@ module.exports = (app) => {
       events.forEach((eventName) => {
         app.removeListener(eventName, onAISEvent);
       });
+      unsubscribes.forEach((f) => f());
+      unsubscribes = [];
       if (interval) {
         clearInterval(interval);
       }

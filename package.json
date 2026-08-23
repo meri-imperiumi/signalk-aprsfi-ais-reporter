@@ -37,6 +37,9 @@
     "displayName": "AIS to aprs.fi Reporter",
     "screenshots": [
       "./doc/panama-canal.png"
+    ],
+    "recommends": [
+      "@meri-imperiumi/signalk-internet"
     ]
   }
 }
