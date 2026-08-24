@@ -88,6 +88,7 @@ test('schema is a JSON object with required upload settings', () => {
   assert.ok(plugin.schema.properties.url);
   assert.ok(plugin.schema.properties.interval);
   assert.ok(plugin.schema.properties.event);
+  assert.ok(plugin.schema.properties.submitOnMetered);
 });
 
 test('start without a URL sets a status message and does not subscribe', () => {
@@ -173,6 +174,54 @@ test('internet offline state skips submission', async () => {
       `got ${JSON.stringify(app.statusMessages)}`,
     );
     assert.ok(!lastFetchArgs, 'a fetch was made while offline');
+  } finally {
+    restoreFetchShim();
+  }
+});
+
+test('metered state skips submission by default', async () => {
+  installFetchShim();
+  try {
+    const { app, plugin } = makeStarted();
+    emitDelta(app, {
+      context: 'vessels.self',
+      updates: [
+        { values: [{ path: 'network.internet.state', value: 'metered' }] },
+      ],
+    });
+    await wait(5);
+    app.emit('nmea0183', '!AIVDM,1,1,,A,35Mk6gP0000G>2JQ8P000@N00000,0*31');
+    await wait(250);
+    plugin.stop();
+    assert.ok(
+      app.statusMessages.some((m) => /metered/i.test(m.msg)),
+      `got ${JSON.stringify(app.statusMessages)}`,
+    );
+    assert.ok(!lastFetchArgs, 'a fetch was made while metered');
+  } finally {
+    restoreFetchShim();
+  }
+});
+
+test('metered state submits when submitOnMetered is enabled', async () => {
+  installFetchShim();
+  try {
+    const { app, plugin } = makeStarted({ submitOnMetered: true });
+    emitDelta(app, {
+      context: 'vessels.self',
+      updates: [
+        { values: [{ path: 'network.internet.state', value: 'metered' }] },
+      ],
+    });
+    await wait(5);
+    app.emit('nmea0183', '!AIVDM,1,1,,A,35Mk6gP0000G>2JQ8P000@N00000,0*31');
+    await wait(250);
+    plugin.stop();
+    assert.ok(lastFetchArgs, 'no fetch was made while metered+opted in');
+    assert.ok(
+      app.statusMessages.some((m) => /submitted/i.test(m.msg)),
+      `got ${JSON.stringify(app.statusMessages)}`,
+    );
   } finally {
     restoreFetchShim();
   }

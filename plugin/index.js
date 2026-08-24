@@ -10,6 +10,7 @@ module.exports = (app) => {
   let queue = {};
   let interval;
   let internetState = null;
+  let submitOnMetered = false;
   const plugin = {
     id: 'signalk-aprsfi-ais-reporter',
     name: 'aprs.fi AIS reporter',
@@ -19,6 +20,7 @@ module.exports = (app) => {
         app.setPluginStatus('No upload URL set');
         return;
       }
+      submitOnMetered = !!settings.submitOnMetered;
       decoder.on('data', (data) => {
         let aisData = data;
         if (typeof data === 'string') {
@@ -149,6 +151,10 @@ module.exports = (app) => {
           app.setPluginStatus('Internet offline, skipping aprs.fi submission');
           return;
         }
+        if (internetState === 'metered' && !submitOnMetered) {
+          app.setPluginStatus('Internet metered, skipping aprs.fi submission');
+          return;
+        }
         if (Object.keys(queue).length === 0) {
           app.setPluginStatus('No AIS events to report');
           return;
@@ -248,6 +254,12 @@ module.exports = (app) => {
           title: 'Sending interval',
           default: 30,
           description: 'in seconds',
+        },
+        submitOnMetered: {
+          type: 'boolean',
+          title: 'Submit on metered connections',
+          default: false,
+          description: 'When the Signal K path network.internet.state reports metered, AIS submissions are skipped unless this is enabled',
         },
       },
     },
